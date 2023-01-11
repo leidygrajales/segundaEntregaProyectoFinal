@@ -8,6 +8,7 @@ const renderMessages = (data) => {
       <tr>
         <td scope="row">${item.user}</td>
         <td scope="row">${item.message}</td>
+        <td scope="row">${new Date(item.timestamp).toLocaleString()}</td>
       </tr>
     `)
   }).join(' ')
@@ -41,8 +42,6 @@ const alerMsj = (data) => {
 //4.  funcion que se ejecuta cuando doy al btn enviar
 const addMessage = () => {
   const authorName = document.getElementById('author').value
-  // const today = new Date();
-  // const now = today.toLocaleString();
   const textMsn = document.getElementById('text').value
 
   document.getElementById('text').value = ''

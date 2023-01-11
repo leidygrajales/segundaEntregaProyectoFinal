@@ -1,6 +1,6 @@
 const productosApi = {
     get: () => {
-        return fetch('/api/productos')
+        return fetch('/api/products')
             .then(data => data.json())
     }
 }
@@ -8,11 +8,11 @@ const productosApi = {
 const carritosApi = {
     crearCarrito: () => {
         const options = { method: "POST" }
-        return fetch('/api/carrito', options)
+        return fetch('/api/cart', options)
             .then(data => data.json())
     },
     getIds: () => {
-        return fetch('/api/carrito')
+        return fetch('/api/cart')
             .then(data => data.json())
     },
     postProd: (idCarrito, idProd) => {
@@ -24,17 +24,17 @@ const carritosApi = {
             },
             body: JSON.stringify(data)
         }
-        return fetch(`/api/carrito/${idCarrito}/products`, options)
+        return fetch(`/api/cart/${idCarrito}/products`, options)
     },
     getProds: idCarrito => {
-        return fetch(`/api/carrito/${idCarrito}/products`)
+        return fetch(`/api/cart/${idCarrito}/products`)
             .then(data => data.json())
     },
     deleteProd: (idCarrito, idProducto) => {
         const options = {
             method: 'DELETE',
         }
-        return fetch(`/api/carrito/${idCarrito}/products/${idProducto}`, options)
+        return fetch(`/api/cart/${idCarrito}/products/${idProducto}`, options)
     }
 }
 
@@ -80,11 +80,13 @@ document.getElementById('btnCrearCart').addEventListener('click', () => {
 document.getElementById('comboCarritos').addEventListener('change', () => {
     const idCarrito = document.getElementById('comboCarritos').value
     actualizarListaCarrito(idCarrito)
+    loadComboProductos()
 })
 
 function agregarAlCarrito(idCarrito, idProducto) {
     return carritosApi.postProd(idCarrito, idProducto).then(() => {
         actualizarListaCarrito(idCarrito)
+        loadComboProductos()
     })
 }
 
@@ -92,6 +94,7 @@ function quitarDelCarrito(idProducto) {
     const idCarrito = document.getElementById('comboCarritos').value
     return carritosApi.deleteProd(idCarrito, idProducto).then(() => {
         actualizarListaCarrito(idCarrito)
+        loadComboProductos()
     })
 }
 
@@ -164,13 +167,31 @@ function crearOpcionInicial(leyenda) {
 function loadComboProductos() {
     return productosApi.get()
         .then(productos => {
+
+            const idCarrito = document.getElementById('comboCarritos').value
             const combo = document.getElementById('comboProductos');
+            vaciarCombo(combo)
             combo.appendChild(crearOpcionInicial('Choose a product'))
-            for (const prod of productos) {
-                const comboItem = document.createElement("option");
-                comboItem.value = prod.id;
-                comboItem.text = prod.title;
-                combo.appendChild(comboItem);
+
+            if (idCarrito == '') {
+                productos.map(prod => {
+                    const comboItem = document.createElement("option");
+                    comboItem.value = prod.id;
+                    comboItem.text = prod.title;
+                    combo.appendChild(comboItem);
+                })
+
+            } else {
+                carritosApi.getProds(idCarrito).then((cartProducts) => {
+                    productos.map(prod => {
+                        if (!cartProducts.some(cartproduct => cartproduct.id === prod.id)) {
+                            const comboItem = document.createElement("option");
+                            comboItem.value = prod.id;
+                            comboItem.text = prod.title;
+                            combo.appendChild(comboItem);
+                        }
+                    })
+                })
             }
         })
 }

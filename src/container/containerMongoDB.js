@@ -8,7 +8,8 @@ class ContainerMongoDB {
 
   async save(obj) {
     try {
-      const newDocument = new this.model(obj)
+      const timestamp = Date.now()
+      const newDocument = new this.model({ ...obj, timestamp })
       const result = await newDocument.save()
       return { id: result.id }
     } catch (e) {
@@ -18,7 +19,8 @@ class ContainerMongoDB {
 
   async getAll() {
     try {
-      const data = await this.model.find({});
+      const data = await this.model.find({}).lean();
+      data.map(item => delete Object.assign(item, { id: item._id })['_id'])
       return data
     } catch (e) {
       console.log(e)
@@ -27,10 +29,13 @@ class ContainerMongoDB {
 
   async getById(id) {
     try {
-      const obj = await this.model.find({ _id: id })
+      const obj = Object.assign(...await this.model.find({ _id: id }).lean())
+      delete Object.assign(obj, { id: obj._id })['_id']
+
       if (!obj) {
         return { error: 'elemento no encontrado' }
       }
+
       return obj
     } catch (e) {
       console.log(e)

@@ -1,8 +1,12 @@
 import fs from 'fs/promises'
+import fsSync from 'fs'
 
-class Container {
+class ContainerFileSystem {
   constructor(path) {
     this.path = path
+    if (!fsSync.existsSync(this.path)) {
+      fsSync.writeFileSync(this.path, '[]', () => { })
+    }
   }
 
   async save(obj) {
@@ -92,4 +96,4 @@ class Container {
   }
 }
 
-export default Container
+export default ContainerFileSystem

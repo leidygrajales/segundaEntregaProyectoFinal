@@ -1,33 +1,80 @@
-let productosDao
-let carritosDao
 
-switch ('mongodb') {
-    case 'json':
-        const { default: productosDaoArchivo } = await import('./productos/productosDaoArchivos.js')
-        const { default: carritosDaoArchivo } = await import('./carritos/carritosDaoArchivos.js')
 
-        productosDao = new productosDaoArchivo()
-        carritosDao = new carritosDaoArchivo()
-        break
-    case 'firebase':
+import admin from 'firebase-admin'
+import mongoose from 'mongoose'
+import knex from 'knex'
 
-        break
-    case 'mongodb':
-        const { default: productosDaoMongodb } = await import('./productos/productosDaoMongoDb.js')
-        const { default: carritosDaoMongodb } = await import('./carritos/carritosDaoMongoDb.js')
+import configs from '../config/index'
 
-        productosDao = new productosDaoMongodb()
-        carritosDao = new carritosDaoMongodb()
-        break
-    case 'mariadb':
+import ContainerMongoDB from '../container/containerMongoDB'
+import ContainerFileSystem from '../container/containerFileSystem'
+import ContainerKnex from '../container/containerKnex'
 
-        break
-    case 'sqlite3':
+import { Product } from '../models/Product'
+import { Message } from '../models/Message'
+import { Cart } from '../models/Cart'
 
-        break
-    default:
+import initializeDB from '../script/initializeDB'
+import ContainerFirebase from '../container/ContainerFirebase'
 
-        break
+const Daos = async (type) => {
+    let cartDao
+    let productsDao
+    let messagesDao
+
+    switch (type) {
+        case 'json':
+            cartDao = new ContainerFileSystem("./src/DB/cart.json")
+            productsDao = new ContainerFileSystem("./src/DB/products.json")
+            messagesDao = new ContainerFileSystem("./src/DB/messages.json")
+            break
+        case 'firebase':
+
+            try {
+                admin.initializeApp({
+                    credential: admin.credential.cert(configs.firebase)
+                })
+
+                const db = admin.firestore();
+
+                cartDao = new ContainerFirebase('cart', db)
+                productsDao = new ContainerFirebase('products', db)
+                messagesDao = new ContainerFirebase('messages', db)
+            } catch (error) {
+                console.log('error', error);
+            }
+
+            break
+        case 'mongodb':
+            await mongoose.connect(configs.mongodb.connectionString);
+
+            cartDao = new ContainerMongoDB(Cart)
+            productsDao = new ContainerMongoDB(Product)
+            messagesDao = new ContainerMongoDB(Message)
+            break
+        case 'mysql':
+            const mySQLConnection = knex(configs.mysql)
+            await initializeDB(mySQLConnection)
+
+            cartDao = new ContainerKnex(mySQLConnection, 'cart')
+            productsDao = new ContainerKnex(mySQLConnection, 'products')
+            messagesDao = new ContainerKnex(mySQLConnection, 'messages')
+            break
+        case 'sqlite3':
+            const sqlite3Connection = knex(configs.sqlite3)
+            await initializeDB(sqlite3Connection)
+
+            cartDao = new ContainerKnex(sqlite3Connection, 'cart')
+            productsDao = new ContainerKnex(sqlite3Connection, 'products')
+            messagesDao = new ContainerKnex(sqlite3Connection, 'messages')
+            break
+        default:
+
+            break
+    }
+
+    return { cartDao, productsDao, messagesDao }
 }
 
-export { productosDao, carritosDao }
+export default Daos
+

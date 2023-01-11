@@ -1,16 +1,17 @@
-
-import knex from 'knex';
-
 class ContainerSQL {
 
-  constructor(options, table) {
-    this.connection = knex(options)
+  constructor(connection, table) {
+    this.connection = connection
     this.table = table
   }
 
   async save(obj) {
     try {
-      const [insert] = await this.connection.insert(obj).into(this.table)
+      const timestamp = Date.now()
+      // if (obj.hasOwnProperty('products')) {
+      //   obj.products = JSON.stringify(obj.products)
+      // }
+      const [insert] = await this.connection.insert({ ...obj, timestamp }).into(this.table)
       return { id: insert }
     } catch (e) {
       console.log(e)
@@ -29,6 +30,9 @@ class ContainerSQL {
   async getById(id) {
     try {
       const obj = await this.connection(this.table).select('*').where('id', '=', id).first()
+      // if (obj.hasOwnProperty('products')) {
+      //   obj.products = JSON.parse(obj.products)
+      // }
       if (!obj) {
         return { error: 'elemento no encontrado' }
       }
