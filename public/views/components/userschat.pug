@@ -1,11 +1,22 @@
 
 div(class="d-flex flex-grow-1 flex-column bg-light p-3 rounded border")
+  h1(compresion: id="compresion-info")="Centro de mensajes"
   h3(class="text-center text-primary")="USERS CHAT"
   form(onsubmit="return addMessage(this)" class="row align-items-center gy-3 mt-0")
     div(class="input-group mb-3")
       div(class="form-floating")
         input(type="text" id="author" class="form-control" placeholder="Email")
         label="Email" 
+        input(type="text" id="authorName" class="form-control" placeholder="Name")
+        label="name" 
+        input(type="text" id="authorLastName" class="form-control" placeholder="LastName")
+        label="lastName" 
+        input(type="text" id="authorAge" class="form-control" placeholder="Age")
+        label="age" 
+        input(type="text" id="authorUserName" class="form-control" placeholder="UserName")
+        label="UserName" 
+        input(type="text" id="authorAvatar" class="form-control" placeholder="Avatar (URL)")
+        label="Avatar" 
       div(class="form-floating")
         input(type="text" id="text" class="form-control" placeholder="Message")
         label="Message" 
@@ -16,7 +27,12 @@ div(class="d-flex flex-grow-1 flex-column bg-light p-3 rounded border")
   table(class="table table-default table-striped table-bordered mt-2")
     thead
       tr(class="text-primary table-secondary")
+        th(scope="col")="Email"
+        th(scope="col")="Name"
+        th(scope="col")="LastName"
+        th(scope="col")="Age"
         th(scope="col")="User"
+        th(scope="col")="Avatar"
         th(scope="col")="Message"
         th(scope="col")="Date"
     tbody(id="message-list")

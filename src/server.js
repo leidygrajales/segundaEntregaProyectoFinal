@@ -10,6 +10,33 @@ import ProductsRouter from './routes/products.Router'
 
 import Daos from './daos/index'
 
+import faker from 'faker'
+faker.locale = 'es'
+
+import { normalize, schema } from 'normalizr'
+import util from 'util'
+function print(objeto) {
+  console.log(util.inspect(objeto, false, 12, true));
+}
+
+//Definimos un esquemas de autores
+const authorSchema = new schema.Entity('authors', {}, { idAttribute: "mail" });
+const textSchema = new schema.Entity('text');
+const mensajeSchema = new schema.Entity('messages', {
+  author: authorSchema,
+  text: [textSchema]
+});
+
+// Creamos esta funcion para listar los mensajes normalizados utilizando los metodos del contenedor 
+async function listarMensajesN() {
+  const archivoMensajes = await mensajesApi.listarAll()
+  const normalizados = normalizarMensajes(archivoMensajes)
+  print(normalizados)
+  return normalizados
+}
+const normalizarMensajes = (mensajesConId) => normalize(mensajesConId, [mensajeSchema])
+
+
 // const { cartDao: cartApi, productsDao: productsApi, messagesDao: messagesApi } = await Daos('json')
 const { cartDao: cartApi, productsDao: productsApi, messagesDao: messagesApi } = await Daos('firebase')
 // const { cartDao: cartApi, productsDao: productsApi, messagesDao: messagesApi } = await Daos('mongodb')
