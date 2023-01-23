@@ -1,25 +1,41 @@
 
 div(class="d-flex flex-grow-1 flex-column bg-light p-3 rounded border")
-  h1(compresion: id="compresion-info")="Centro de mensajes"
+  h1(id="compresion-info")="Centro de mensajes"
   h3(class="text-center text-primary")="USERS CHAT"
-  form(onsubmit="return addMessage(this)" class="row align-items-center gy-3 mt-0")
-    div(class="input-group mb-3")
+  form(onsubmit="return addMessage(this)" class="row align-items-center gy-3 mt-0" id="messageForm")
+
+    div(class="input-group mb-1")
       div(class="form-floating")
-        input(type="text" id="author" class="form-control" placeholder="Email")
+        input(type="text" id="authorEmail" class="form-control" placeholder="Email")
         label="Email" 
-        input(type="text" id="authorName" class="form-control" placeholder="Name")
-        label="name" 
-        input(type="text" id="authorLastName" class="form-control" placeholder="LastName")
-        label="lastName" 
-        input(type="text" id="authorAge" class="form-control" placeholder="Age")
-        label="age" 
-        input(type="text" id="authorUserName" class="form-control" placeholder="UserName")
-        label="UserName" 
-        input(type="text" id="authorAvatar" class="form-control" placeholder="Avatar (URL)")
-        label="Avatar" 
+
       div(class="form-floating")
-        input(type="text" id="text" class="form-control" placeholder="Message")
+        input(type="text" id="authorAvatar" class="form-control" placeholder="Avatar url")
+        label="Avatar url"
+
+    div(class="input-group mb-1")
+      div(class="form-floating")
+        input(type="text" id="authorName" class="form-control" placeholder="Name")
+        label="Name" 
+
+      div(class="form-floating")
+        input(type="text" id="authorLastName" class="form-control" placeholder="Lastname")
+        label="Lastname" 
+
+    div(class="input-group mb-1")
+      div(class="form-floating")
+        input(type="text" id="authorAge" class="form-control" placeholder="Age")
+        label="Age" 
+
+      div(class="form-floating")
+        input(type="text" id="authorUserName" class="form-control" placeholder="Username")
+        label="Username" 
+
+    div(class="input-group mb-1")
+      div(class="form-floating")
+        input(type="text" id="textMsg" class="form-control" placeholder="Message")
         label="Message" 
+      
       button(class="btn btn-outline-primary" type="submit" id="button-addon2")
         svg(xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-send" viewBox="0 0 16 16")
           path(d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576 6.636 10.07Zm6.787-8.201L1.591 6.602l4.339 2.76 7.494-7.493Z")
@@ -27,12 +43,12 @@ div(class="d-flex flex-grow-1 flex-column bg-light p-3 rounded border")
   table(class="table table-default table-striped table-bordered mt-2")
     thead
       tr(class="text-primary table-secondary")
+        th(scope="col")="Avatar"
         th(scope="col")="Email"
         th(scope="col")="Name"
-        th(scope="col")="LastName"
+        th(scope="col")="Lastname"
         th(scope="col")="Age"
-        th(scope="col")="User"
-        th(scope="col")="Avatar"
+        th(scope="col")="Username"
         th(scope="col")="Message"
         th(scope="col")="Date"
     tbody(id="message-list")

@@ -16,6 +16,7 @@ import { Cart } from '../models/Cart'
 
 import initializeDB from '../script/initializeDB'
 import ContainerFirebase from '../container/ContainerFirebase'
+import ContainerFaker from '../container/containerFaker'
 
 const Daos = async (type) => {
     let cartDao
@@ -67,6 +68,10 @@ const Daos = async (type) => {
             cartDao = new ContainerKnex(sqlite3Connection, 'cart')
             productsDao = new ContainerKnex(sqlite3Connection, 'products')
             messagesDao = new ContainerKnex(sqlite3Connection, 'messages')
+            break
+
+        case 'faker':
+            productsDao = new ContainerFaker('products')
             break
         default:
 

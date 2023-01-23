@@ -10,35 +10,14 @@ import ProductsRouter from './routes/products.Router'
 
 import Daos from './daos/index'
 
-import faker from 'faker'
-faker.locale = 'es'
-
 import { normalize, schema } from 'normalizr'
 import util from 'util'
-function print(objeto) {
-  console.log(util.inspect(objeto, false, 12, true));
-}
+import ProductsTestRouter from './routes/products_test.Router'
 
-//Definimos un esquemas de autores
-const authorSchema = new schema.Entity('authors', {}, { idAttribute: "mail" });
-const textSchema = new schema.Entity('text');
-const mensajeSchema = new schema.Entity('messages', {
-  author: authorSchema,
-  text: [textSchema]
-});
+const { cartDao: cartApi, productsDao: productsApi, messagesDao: messagesApi } = await Daos('json')
+const { productsDao: productsFakerApi } = await Daos('faker')
 
-// Creamos esta funcion para listar los mensajes normalizados utilizando los metodos del contenedor 
-async function listarMensajesN() {
-  const archivoMensajes = await mensajesApi.listarAll()
-  const normalizados = normalizarMensajes(archivoMensajes)
-  print(normalizados)
-  return normalizados
-}
-const normalizarMensajes = (mensajesConId) => normalize(mensajesConId, [mensajeSchema])
-
-
-// const { cartDao: cartApi, productsDao: productsApi, messagesDao: messagesApi } = await Daos('json')
-const { cartDao: cartApi, productsDao: productsApi, messagesDao: messagesApi } = await Daos('firebase')
+// const { cartDao: cartApi, productsDao: productsApi, messagesDao: messagesApi } = await Daos('firebase')
 // const { cartDao: cartApi, productsDao: productsApi, messagesDao: messagesApi } = await Daos('mongodb')
 // const { cartDao: cartApi, productsDao: productsApi, messagesDao: messagesApi } = await Daos('mysql')
 // const { cartDao: cartApi, productsDao: productsApi, messagesDao: messagesApi } = await Daos('sqlite3')
@@ -83,6 +62,8 @@ app.use(upload.array());
 
 app.use('/api/products', ProductsRouter(productsApi, soloAdmins))
 app.use('/api/cart', CartRouter(cartApi, productsApi))
+app.use('/api/products-test', ProductsTestRouter(productsFakerApi))
+
 
 app.use('/socket.io', express.static(path.join(__dirname, '../node_modules/socket.io/client-dist')))
 app.use(express.static(path.join(__dirname, '../public')))
@@ -99,22 +80,43 @@ app.get('/products', async (req, res) => {
 app.get('/cart', async (req, res) => {
   res.render('pages/cart')
 })
-app.get('*', function (req, res) {
+app.get('*', (req, res) => {
   res.send({ status: "error", description: `ruta ${req.url} método ${req.method} no implementada` });
 })
+
+
+const print = (objeto) => {
+  console.log(util.inspect(objeto, false, 12, true));
+}
+
+//Definimos un esquemas de autores
+const authorSchema = new schema.Entity('authors', {}, { idAttribute: "email" });
+const textSchema = new schema.Entity('text');
+const mensajeSchema = new schema.Entity('messages', {
+  author: authorSchema,
+  message: [textSchema]
+});
+
+// Creamos esta funcion para listar los mensajes normalizados utilizando los metodos del contenedor 
+const listarMensajesN = async () => {
+  const archivoMensajes = await messagesApi.getAll()
+  const normalizados = normalizarMensajes(archivoMensajes)
+  // print(normalizados)
+  return normalizados
+}
+const normalizarMensajes = (mensajesConId) => normalize(mensajesConId, [mensajeSchema])
 
 io.on('connection', async socket => {
 
   //historial del chat cuando el nuevo cliente se conecte 
 
-  socket.emit('messages', await messagesApi.getAll())
+  socket.emit('messages', await listarMensajesN())
 
   //escuchamos al cliente
   socket.on('new-message', async data => {
     await messagesApi.save(data)
-
     //re enviamos por medio de broadcast los msn a todos los clientrs que esten conectados
-    io.sockets.emit('messages', await messagesApi.getAll())
+    io.sockets.emit('messages', await listarMensajesN())
   })
 })
 
